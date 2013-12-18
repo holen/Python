@@ -4,12 +4,13 @@ apt-get install libcairo2-dev -y
 # download py2cairo for python2.7
 Download [py2cairo](http://cairographics.org/releases/py2cairo-1.10.0.tar.bz2) 
 ## install py2cairo
-`tar jxvf py2cairo-1.10.0.tar.bz2  
-cd py2cairo-1.10.0  
-./waf configure  
-./waf configure  
-./waf build  
-./waf install`
+
+    tar jxvf py2cairo-1.10.0.tar.bz2  
+    cd py2cairo-1.10.0  
+    ./waf configure  
+    ./waf configure  
+    ./waf build  
+    ./waf install
 
 # test
 
