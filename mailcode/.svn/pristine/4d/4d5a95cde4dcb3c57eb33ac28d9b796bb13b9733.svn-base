@@ -1,0 +1,39 @@
+{% extends "base.html" %} 
+{% block content %}
+
+<div>
+	<table class="table table-bordered table-condensed table-hover">
+	<tr class="success">
+		<td width='10%'>{{ client_id }}</td>
+		<td width='60%'>{{ subject }}</td>
+		<td width='30%'>{{ domain }}</td>
+	</tr>
+	</table>	
+</div>
+<div>
+<table class="table table-bordered table-condensed table-hover">
+    <tr class="success">
+    	<td width="5%">message_id</td>
+        <td width="20%">real_from</td>
+        <td width="15%">to_ip</td>
+        <td width="50%">error</td>
+        <td>count</td>
+    </tr>
+    	{# for data in reports #}
+    	{% regroup reports by message_id as grouped_by_mid %} 
+    	{% for mid_group in grouped_by_mid %}
+    	{% for data in mid_group.list %}
+    	<tr>
+	    {% ifchanged mid_group.grouper %}
+	    <td rowspan="{{ mid_group.list|length }}">{{mid_group.grouper}}</td>
+	    {% endifchanged %}
+	    <td>{{ data.real_from }}</td>
+	    <td>{{ data.to_ip }}</td>
+	    <td>{{ data.error }}</td>
+	    <td class="{% if data.count > 100 %}alert alert-error{% endif%} ">{{ data.count }}</td>
+		</tr>
+		{% endfor %}
+		{% endfor %}
+</table>
+</div>
+{% endblock %}

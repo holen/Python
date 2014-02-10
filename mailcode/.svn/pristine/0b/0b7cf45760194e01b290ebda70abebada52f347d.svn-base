@@ -1,0 +1,119 @@
+{% extends "base.html" %} 
+{% block content %}
+<div class="row" style="margin:0 0 10px -20px;">
+	<div id="quick_btn_div" class="btn-group span4" data-toggle="buttons-radio">
+		<button onclick="post_form('today')" id="today" class="btn">今天</button>
+		<button onclick="post_form('yestoday')" id="yestoday" class="btn">昨天</button>
+		<button onclick="post_form('week')" id="week" class="btn">本周</button>
+		<button onclick="post_form('custom')" id="custom" class="btn activate">自定义</button>
+	</div>
+	<div class="span4">
+	<form id="q_form" class="form-inline" method="post" action="/statd/{{q_type}}"  style="margin:0px;"> 
+		<div id="q_form_div" style="display:none;">
+			{% csrf_token %}
+			<input id="start" name="start" type="text" class="input-small" placeholder="起始日期" value="{{start}}">
+			<input id="end" name="end" type="text" class="input-small" placeholder="终止日期" value="{{end}}">
+			<input id="domain" name="domain" type="hidden" value="{{domain}}">
+			<button class="btn" type="submit">查询</button>
+		</div>
+	</form>
+	</div>
+	<div class="offset1 span2">
+		<select id="domain_selector">
+			<option value="ALL">ALL</option> 
+			{% for option in domains %} 
+			<option value="{{ option }}" {% ifequal option domain%}selected{% endifequal%}>{{ option }}</option> 
+			{% endfor %} 
+	    </select>
+    </div>
+</div>
+<div class="row"></div>
+<div>
+<table class="table table-bordered table-condensed table-hover">
+    <tr class="success">
+        <td width="10%">日期</td>
+        <td width="12%">客户名称</td>
+        <td width="18%">邮件主题</td>
+        <td>发送域</td>
+        <td>总量</td>
+        <td>成功</td>
+        <td>失败</td>
+        <td>硬退</td>
+        <td>屏蔽</td>
+        <td>阅读人数</td>
+        <td>点击人数</td>
+    </tr>
+	{% regroup datas by rq as grouped_by_rq %} 
+	{% for rq_group in grouped_by_rq %}
+
+	{% regroup rq_group.list by client_id as grouped_by_client %} 
+	{% for client_group in grouped_by_client %}
+
+	{% regroup client_group.list by subject as grouped_by_subject %} 
+	{% for subject_group in grouped_by_subject %}
+	{% for subject_row in subject_group.list %}
+	<tr>
+		{% comment %}
+	   	{% ifchanged forloop.parentloop.first %}
+	        <td rowspan="{{client_group.list|length }}">{{client_group.grouper}}</td>
+	    {% endifchanged %}
+	    {% endcomment %} 
+
+	    {% if forloop.parentloop.parentloop.first and forloop.parentloop.first and forloop.first %}
+		<td rowspan="{{rq_group.list|length }}">{{rq_group.grouper}}</td>
+	    {% endif %}
+
+	    {% if forloop.parentloop.first and forloop.first %}
+		<td rowspan="{{client_group.list|length }}">{{client_group.grouper}}</td>
+	    {% endif %}
+
+	    {% ifchanged subject_group.grouper %}
+	    <td rowspan="{{ subject_group.list|length }}">{{subject_group.grouper}}<br/>{{subject_row.schedule_time}}</td>
+	    {% endifchanged %}
+
+	    <td>{{ subject_row.domain_name }}</td>
+	    <td>{{ subject_row.total }}</td>
+	    <td>{{ subject_row.success }}</td>
+	    <td>{{ subject_row.soft }}</td>
+	    <td>{{ subject_row.hard }}</td>
+	    <td>{{ subject_row.block }}</td>
+	    <td>{{ subject_row.dist_ho|default_if_none:'0' }}</td>
+	    <td>{{ subject_row.dist_ct|default_if_none:'0' }}</td>
+	</tr>
+	{% endfor %} 	
+	{% endfor %} 
+	{% endfor %} 
+	{% endfor %} 
+</table>
+</div>
+{% endblock %}
+{% block script %}
+	$(document).ready(function($){
+		var q_type = "{{ q_type }}";
+		$("#" + q_type).addClass("active");
+
+		$("#domain_selector option[value='{{domain}}']").attr("checked", "1");
+
+		if(q_type == "custom") {
+			$("#q_form_div").show();
+		}
+
+		$("#domain_selector").change(function(e){
+			var domain = $("#domain_selector option:selected").attr("value");
+			$("#domain").val(domain);
+			$("#q_form").submit();
+		});
+	});
+
+	function post_form(q_type) {
+		$("#q_form").attr("action", "/statd/" + q_type);
+		if(q_type != "custom") {
+			$("#domain").val($("#domain_selector option:selected").attr("value"));
+			$("#q_form").submit();
+		}
+		else {
+			$("#q_form_div").show();
+		}
+	}
+
+{% endblock %}

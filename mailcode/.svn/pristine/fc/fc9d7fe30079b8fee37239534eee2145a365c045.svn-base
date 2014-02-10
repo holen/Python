@@ -1,0 +1,75 @@
+{% extends "base.html" %} 
+{% block content %}
+<div>
+	<div id="J_WithTime">aaaa</div>
+</div>
+<div>
+<table class="table table-bordered table-condensed table-hover" style="">
+    <tr class="success">
+        <td width="10%">日期</td>
+        <td width="12%">客户名称</td>
+        <td width="18%">邮件主题</td>
+        <td>发送域</td>
+        <td>总量</td>
+        <td>成功</td>
+        <td>失败</td>
+        <td>硬退</td>
+        <td>屏蔽</td>
+        <td>阅读人数</td>
+        <td>点击人数</td>
+    </tr>
+	{% regroup displays by rq as grouped_by_rq %} 
+	{% for rq_group in grouped_by_rq %}
+
+	{% regroup rq_group.list by client_id as grouped_by_client %} 
+	{% for client_group in grouped_by_client %}
+
+	{% regroup client_group.list by subject as grouped_by_subject %} 
+	{% for subject_group in grouped_by_subject %}
+	{% for subject_row in subject_group.list %}
+	<tr>
+		 {% comment %}
+	   	{% ifchanged forloop.parentloop.first %}
+	        <td rowspan="{{client_group.list|length }}">{{client_group.grouper}}</td>
+	    {% endifchanged %}
+	     {% endcomment %} 
+
+	    {% if forloop.parentloop.parentloop.first and forloop.parentloop.first and forloop.first %}
+		<td rowspan="{{rq_group.list|length }}">{{rq_group.grouper}}</td>
+	    {% endif %}
+
+	    {% if forloop.parentloop.first and forloop.first %}
+		<td rowspan="{{client_group.list|length }}">{{client_group.grouper}}</td>
+	    {% endif %}
+
+	    {% ifchanged subject_group.grouper %}
+	    <td rowspan="{{ subject_group.list|length }}">{{subject_group.grouper}}<br/>{{subject_row.schedule_time}}</td>
+	    {% endifchanged %}
+
+	    <td>{{ subject_row.domain_name }}</td>
+	    <td>{{ subject_row.total }}</td>
+	    <td>{{ subject_row.success }}</td>
+	    <td>{{ subject_row.soft }}</td>
+	    <td>{{ subject_row.hard }}</td>
+	    <td>{{ subject_row.block }}</td>
+	    <td>{{ subject_row.dist_ho|default_if_none:'0' }}</td>
+	    <td>{{ subject_row.dist_ct|default_if_none:'0' }}</td>
+	    <td>{{ (subject_row.dist_ct)/(subject_row.success)|default_if_none:'0' }}</td>
+	</tr>
+	{% endfor %} 	
+	{% endfor %} 
+	{% endfor %} 
+	{% endfor %} 
+</table>
+</div>
+<script type="text/javascript">
+	KISSY.ready(function(S){
+		KISSY.use('calendar,calendar/assets/dpl.css',function(S, Calendar) {
+	 		var c = new Calendar('#J_WithTime', {
+	            popup:false
+	        });
+		});
+	});
+</script>
+
+{% endblock %}

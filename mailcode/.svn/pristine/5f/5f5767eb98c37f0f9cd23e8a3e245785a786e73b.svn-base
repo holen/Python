@@ -1,0 +1,112 @@
+from django.template import loader,Context  
+from django.http import HttpResponse  
+import common.mdb as mdb;
+from datetime import datetime, time, timedelta;
+
+def statd(request):  
+    t = loader.get_template('statd/statd.html');
+    c = Context({'displays': get_statd()})  
+    return HttpResponse(t.render(c));
+
+def get_statd():
+    
+    stat_sql = '''
+        select 
+            '%s' as rq, '%s' as client_id, '%s' as subject, a.domain_name,a.total,a.success,a.success/(a.success+a.soft) as lv,a.soft,a.soft/(a.success+a.soft) as sv,
+            a.hard,a.hard/a.total as hv,a.block,a.block/a.total as bv,b.dist_ho,b.dist_ho/a.success as ho_lv,c.dist_ct,
+            c.dist_ct/a.success as ct_lv 
+        from
+        (
+            select 
+                sd.domain_name, 
+                sum(sd.group_count) as total,
+                sum(if(sd.return_type_id = 1, sd.group_count, 0)) as success,
+                sum(if(sd.return_type_id = 2, sd.group_count, 0)) as soft,
+                sum(if(sd.return_type_id = 3, sd.group_count, 0)) as hard,
+                sum(if(sd.return_type_id = 0, sd.group_count, 0)) as block              
+            from 
+                summary_%s_delivery sd 
+            where 
+                sd.message_id in (%s) 
+            group by sd.domain_name 
+            order by total desc ) as a 
+        left join (
+            select 
+                domain_name,
+                sum(group_count) as ho,
+                sum(group_distinct_count) as dist_ho
+            from 
+                summary_%s_domain_ho  
+            where 
+                message_id in (%s) 
+            group by domain_name 
+            order by domain_name desc ) as b on a.domain_name = b.domain_name
+        left join (
+            select 
+                domain_name,
+                sum(group_count) as ct,
+                sum(group_distinct_count) as dist_ct
+            from 
+                summary_%s_domain_ct  
+            where 
+                message_id in (%s) 
+            group by domain_name 
+            order by domain_name desc ) as c on a.domain_name = c.domain_name
+    '''
+    
+    message_detail = get_all_message();
+    archive_conn = mdb.get_archive_conn();
+    
+    display = [];
+    for row in message_detail :
+        client_id = str(row["client_id"]);
+        message_ids = row["message_ids"];
+        format_args = tuple([row["rq"], client_id, row["subject"]] + [client_id, message_ids] * 3);
+        domain_stat = mdb.exe_sql(archive_conn, stat_sql % (format_args), True);
+        display.extend(domain_stat);
+    mdb.close_conn(archive_conn);
+    return display;
+
+def get_all_message(start = None, end = None, branch = None, client = None):
+    
+    today = datetime.combine(datetime.today(), time(0, 0));
+    yestoday = today - timedelta(days=1);
+    
+    find_msg_sql = """
+        select 
+            DATE_FORMAT(m.schedule_time, '%%y-%%m-%%d') as rq, m.client_id, m.subject, c.client_name, group_concat(m.message_id) as message_ids
+        from 
+            message m, client c
+        where 
+            m.client_id = c.client_id and c.client_id <> 1 and c.client_id <> 2
+            and m.schedule_time between '%s' and '%s'
+    """;
+    
+    if(not start):
+        start = yestoday;
+    elif (not end):
+        end = datetime.combine(datetime.strptime(start, "%Y-%m-%d"), time(0, 0)) + timedelta(days=1);
+    
+    if(not end):
+        end = today;
+        
+    if(client):
+        find_msg_sql += " and m.client_id in (%s)" % (client);
+    if(branch):
+        find_msg_sql += " and c.branch_id in (%s)" % (branch);
+        
+    find_msg_sql += '''
+        group by 
+            DATE_FORMAT(m.schedule_time, '%%y-%%m-%%d'), c.client_id, c.client_name, m.subject
+        order by
+            DATE_FORMAT(m.schedule_time, '%%y-%%m-%%d') asc, c.client_id asc, m.subject asc
+    '''
+        
+    global_conn = mdb.get_global_conn();
+    aa = mdb.exe_sql(global_conn, find_msg_sql % (start, end), True, True);
+    return aa;
+    
+    
+if __name__ == '__main__':  
+    statd();
+        

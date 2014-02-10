@@ -1,0 +1,53 @@
+'''
+Created on 2012-11-21
+
+@author: woo
+'''
+import MySQLdb as db_helper;
+from datetime import datetime, time, timedelta;
+
+
+mdb_user = "epcare"
+mdb_pass = "epcare"
+
+global_db_name  = "globalDB_0";
+mesher_db_name  = "carrierDB_0";
+bounce_db_name  = "bounceDB_0";
+report_db_name  = 'reportDB_0';
+archive_db_name = 'archiveDB_0';
+list_db_name    = 'listDB_0';
+
+global_db_host  = "10.1.1.200";
+bounce_db_host  = "10.1.1.201";
+list_db_host    = "10.1.1.202";
+report_db_host  = "10.1.1.203";
+
+
+today = datetime.combine(datetime.today(), time(0, 0));
+yestoday = today - timedelta(days=1);
+
+def get_global_conn():
+    return db_helper.connect(global_db_host, mdb_user, mdb_pass, global_db_name, charset='utf8');
+
+def get_mesher_conn():
+    return db_helper.connect(global_db_host, mdb_user, mdb_pass, mesher_db_name, charset='utf8');
+
+def get_archive_conn():
+    return db_helper.connect(global_db_host, mdb_user, mdb_pass, archive_db_name, charset='utf8');
+
+def get_report_conn():
+    return db_helper.connect(report_db_host, mdb_user, mdb_pass, report_db_name, charset='utf8');
+
+
+def exe_sql(conn, sql="select 1", use_dict=False, close=False):
+    
+    executor = conn.cursor(db_helper.cursors.DictCursor) if use_dict else conn.cursor();
+    executor.execute(sql);
+    result = executor.fetchall();
+    executor.close();
+    if(close) : 
+        conn.close();
+    return result;
+
+def close_conn(conn):
+    conn.close();

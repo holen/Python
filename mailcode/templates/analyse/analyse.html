@@ -1,0 +1,52 @@
+{% extends "base.html" %} 
+{% block content %}
+
+<form id="group_form" class="form-inline" method="post" action=""  style="margin:1px;"> 
+		<div id="group_form_div" >
+			{% csrf_token %}
+			<input id="group" name="group" type="text" class="input-small" placeholder="group by" value="{{group}}">
+			<button class="btn" type="submit">查询</button>
+		</div>
+</form>
+<div>
+	<table class="table table-bordered table-condensed table-hover">
+	<tr class="success">
+		<td width='10%'>{{ client_id }}</td>
+		<td width='60%'>{{ subject }}</td>
+		<td width='30%'>{{ domain }}</td>
+	</tr>
+	</table>	
+</div>
+<div>
+<table class="table table-bordered table-condensed table-hover">
+    <tr class="success">
+    	<td width="5%">message_id</td>
+        <td width="5%">begin_time</td>
+    	<td width="9%">real_from</td>
+        <td width="5%">from_ip</td>
+        <td width="5%">inner_ip</td>
+        <td width="5%">to_ip</td>
+        <td width="45%">error</td>
+        <td>count</td>
+    </tr>
+    	{# for data in reports #}
+    	{% regroup reports by message_id as grouped_by_mid %} 
+    	{% for mid_group in grouped_by_mid %}
+    	{% for data in mid_group.list %}
+    	<tr>
+	    {% ifchanged mid_group.grouper %}
+	    <td rowspan="{{ mid_group.list|length }}">{{mid_group.grouper}}</td>
+	    {% endifchanged %}
+	    <td>{{ data.begin_time }}</td>
+	    <td>{{ data.real_from }}</td>
+	    <td>{{ data.from_ip }}</td>
+	    <td>{{ data.from_inner_ip }}</td>
+	    <td>{{ data.to_ip }}</td>
+	    <td>{{ data.error }}</td>
+	    <td class="{% if data.count > 100 %}alert alert-error{% endif%} ">{{ data.count }}</td>
+		</tr>
+		{% endfor %}
+		{% endfor %}
+</table>
+</div>
+{% endblock %}
