@@ -5,7 +5,7 @@ M = imaplib.IMAP4("imap.163.com")
 
 try:
 	try:
-		M.login('yh_zhl@163.com','yhqwer1234')
+		M.login('abc@163.com','abc1234')
 	except Exception, e:
 		print 'login error:%s' %e
 		M.close()
