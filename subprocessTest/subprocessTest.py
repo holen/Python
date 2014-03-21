@@ -14,4 +14,14 @@ print out
 for line in out:
     print line.strip()
 
-print subprocess.call('ls -ahl /tmp',shell=True)
+print subprocess.check_call('ls -ahl /tmp',shell=True)
+
+cmd = "foo.txt > bar.txt"
+ret = subprocess.call(cmd, shell=True)
+if ret != 0:
+    if ret < 0:
+        print "Killed by signal", -ret
+    else:
+        print "Command failed with return code", ret
+else:
+    print "SUCCESS!!"
