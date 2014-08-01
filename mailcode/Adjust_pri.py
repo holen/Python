@@ -6,11 +6,15 @@
 import MySQLdb 
 from datetime import datetime, time, timedelta
 import sys
+import parsexml as parsexml
 
-mdb_user = "root"
-mdb_pass = "EpCAre123"
-global_db_name  = "globalDB_0"
-global_db_host  = "10.1.1.244"
+login_info = parsexml.printxmldata("sewcloud")
+mdb_user = login_info['user']
+mdb_pass = login_info['passwd']
+mdb_ip = login_info['ip']
+
+global_db_name  = mdb_ip
+global_db_host  = mdb_ip
 today = datetime.combine(datetime.today(), time(0, 0))
 tomorrow = today + timedelta(days=1)
 

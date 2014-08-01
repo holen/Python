@@ -7,6 +7,8 @@ from django.views.decorators.csrf import csrf_exempt
 import sys
 reload(sys)
 sys.setdefaultencoding('gb2312')
+# today = datetime.combine(datetime.today(), time(9, 0))
+# yesterday = today - timedelta(hours=24)
 
 @csrf_exempt
 @render_to('statd/statd.html')
@@ -23,9 +25,12 @@ def statd(request, q_type = 'today'):
 
 	datas = []
 	if(q_type == 'today'):
+                # today = datetime.combine(datetime.today(),time(9, 0)) + timedelta(hours=24)
 		datas = get_statd(start = datetime.strftime(today, day_format), domain = domain);
 	elif(q_type == 'yestoday'):
 		datas = get_statd(start = datetime.strftime(yesterday, day_format), domain = domain);
+	        # today = datetime.combine(datetime.today(), time(9, 0));
+		# datas = get_statd(start = datetime.strftime(today, day_format), domain = domain);
 	elif(q_type == 'week'):
 		week_ago = date.today() - timedelta(days=7);
 		datas = get_statd(start = datetime.strftime(week_ago, day_format), end = datetime.strftime(yesterday, day_format), domain = domain);
@@ -128,9 +133,9 @@ def get_all_message(start = None, end = None, branch = None, client = None, mess
 		'''
 		
 	if(not start):
-		start = yestoday;
+		start = yesterday;
 	elif (not end):
-		end = datetime.combine(datetime.strptime(start, "%Y-%m-%d"), time(8, 0)) + timedelta(days=1);
+		end = datetime.combine(datetime.strptime(start, "%Y-%m-%d"), time(9, 0)) + timedelta(days=1);
 	
 	if(not end):
 		end = today;
@@ -146,11 +151,12 @@ def get_all_message(start = None, end = None, branch = None, client = None, mess
 		order by
 			DATE_FORMAT(m.schedule_time, '%%y-%%m-%%d') asc, c.client_id asc, m.subject asc
 	'''
+        # print find_msg_sql % (start, end)
 		
 	global_conn = mdb.get_global_conn();
 	if(not message_id):
-		aa = mdb.exe_sql(global_conn, find_msg_sql % (yestoday, today), True, True);
-		# aa = mdb.exe_sql(global_conn, find_msg_sql % (start, end), True, True);
+		# aa = mdb.exe_sql(global_conn, find_msg_sql % (yestoday, today), True, True);
+		aa = mdb.exe_sql(global_conn, find_msg_sql % (start, end), True, True);
 		return aa;
 	else:
 		aa = mdb.exe_sql(global_conn, find_msg_sql % (message_id), True, True);
@@ -160,5 +166,3 @@ def get_all_message(start = None, end = None, branch = None, client = None, mess
 	
 if __name__ == '__main__':  
 	statd();
-		
-		

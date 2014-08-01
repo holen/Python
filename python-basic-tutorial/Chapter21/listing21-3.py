@@ -1,3 +1,5 @@
+#-* coding:UTF-8 -*                                                                                                 
+#!/usr/bin/env python
 from urllib import urlopen
 from reportlab.graphics.shapes import *
 from reportlab.graphics.charts.lineplots import LinePlot
@@ -6,7 +8,6 @@ from reportlab.graphics import renderPDF
 
 URL = 'http://www.swpc.noaa.gov/ftpdir/weekly/Predict.txt'
 COMMENT_CHARS = '#:'
-
 
 drawing = Drawing(400, 200)
 data = []
@@ -20,7 +21,7 @@ low = [row[4] for row in data]
 times = [row[0] + row[1]/12.0 for row in data]
 
 lp = LinePlot()
-lp.x = 50
+lp.x = 30
 lp.y = 50
 lp.height = 125
 lp.width = 300
@@ -35,4 +36,4 @@ drawing.add(String(250, 150, 'Sunspots',
             fontSize=14, fillColor=colors.red))
 
 
-renderPDF.drawToFile(drawing, 'report2.pdf', 'Sunspots')
+renderPDF.drawToFile(drawing, 'report3.pdf', 'Sunspots')

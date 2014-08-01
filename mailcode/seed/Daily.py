@@ -3,7 +3,7 @@
 '''
 Created on 2012-3-11
 
-@author: jlcoa
+@author: z
 '''
 import sys, os;
 import re;
@@ -15,6 +15,12 @@ import uuid
 from string import replace
 import random
 import codecs
+import parsexml as parsexml
+
+login_info = parsexml.printxmldata("sewcloud")
+mdb_user = login_info['user']
+mdb_pass = login_info['passwd']
+mdb_ip = login_info['ip']
 
 def exe_sql(connection, sql, closeAfterExecute):
     executor = connection.cursor();
@@ -117,12 +123,12 @@ class Daily(object):
         reload(sys);
 #        sys.setdefaultencoding('utf-8');
         
-        self.__dbHost = "10.1.1.200";
-        self.__dbUser = "epcare";
-        self.__dbPass = "epcare";
+        self.__dbHost = mdb_ip
+        self.__dbUser = mdb_user
+        self.__dbPass = mdb_pass
         
-        self.__report_db_host = '10.1.1.203';
-        self.__list_db_host = '10.1.1.202';
+        self.__report_db_host = mdb_ip
+        self.__list_db_host = mdb_ip
         
         self.__today = datetime.combine(datetime.today(), time(0, 0));
         self.__yestoday = self.__today - timedelta(days=1);
@@ -331,7 +337,7 @@ class Daily(object):
         
         find_tables_sql = 'show tables like "%_ho"';
         sql = r'''
-            select ho.email_address from %s ho into outfile '/home/woo/ho/%s.csv' fields terminated by ',' optionally enclosed by '"' escaped by '"'  lines terminated by '\r\n';
+            select ho.email_address from %s ho into outfile '/home/z/ho/%s.csv' fields terminated by ',' optionally enclosed by '"' escaped by '"'  lines terminated by '\r\n';
         '''
         conn = MySQLdb.connect(self.__report_db_host, self.__dbUser, self.__dbPass, self.report_db_name, charset='utf8');
         to_export = exe_sql(conn, find_tables_sql, False);

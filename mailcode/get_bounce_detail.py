@@ -3,12 +3,16 @@
 import MySQLdb as db_helper;
 from datetime import datetime, time, timedelta;
 import codecs
+import parsexml as parsexml
 
-mdb_user = "root"
-mdb_pass = "EpCAre123"
-bounce_db_host  = "10.1.1.248";
-global_db_host  = "10.1.1.244";
-global_db_name  = "globalDB_0";
+login_info = parsexml.printxmldata("sewcloud")
+mdb_user = login_info['user']
+mdb_pass = login_info['passwd']
+mdb_ip = login_info['ip']
+
+bounce_db_host  = mdb_ip
+global_db_host  = mdb_ip
+global_db_name  = mdb_ip
 
 get_bouncedb_sql = '''
 	select 

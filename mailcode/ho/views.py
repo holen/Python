@@ -5,12 +5,17 @@ from datetime import datetime, time, timedelta, date;
 import codecs
 import os, csv
 import sys
+import parsexml as parsexml
+
+login_info = parsexml.printxmldata("sewcloud")
+mdb_user = login_info['user']
+mdb_pass = login_info['passwd']
+mdb_ip = login_info['ip']
+
 reload(sys)
 sys.setdefaultencoding('gb2312')
 
-mdb_user = "root"
-mdb_pass = "EpCAre123"
-report_db_host  = "10.1.1.247";
+report_db_host  = mdb_ip;
 report_db_name  = ['reportDB_2', 'reportDB_0', 'reportDB_epcare', 'reportDB_lecast', 'reportDB_epedm', 'reportDB_test'];
 
 def get_report_conn(id):

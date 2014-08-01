@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<machines>
+  <machine name="sewcloud">
+    <ip>10.10.10.1</ip>
+    <user>root</user>
+    <password>abcd1234</password>
+  </machine>
+  <machine name="1010102">
+    <ip>10.10.10.2</ip>
+    <user>root</user>
+    <password>abcd1234</password>
+  </machine>
+</machines>

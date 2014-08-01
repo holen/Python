@@ -7,13 +7,13 @@ from annoying.decorators import render_to
 from django.views.decorators.csrf import csrf_exempt
 
 @csrf_exempt
-@render_to('task/search.html')
+@render_to('task/search1.html')
 
 def search(request):
-	return locals()
+    return locals()
 
 def task(request):
-	
+    return locals()
 
-if __name__ == '__main__':  
+if __name__ == '__main__':
     task();

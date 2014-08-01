@@ -1,13 +1,12 @@
 import MySQLdb as db_helper;
 from datetime import datetime, time, timedelta;
-# get_bouncedb_sql = '''
-# 	select 
-# 		d.db_name,c.branch_id
-# 	from 
-# 		client c,db d 
-# 	where 
-# 		c.bounce_db_id=d.db_id and c.branch_id = 3
-# '''
+import parsexml as parsexml
+
+login_info = parsexml.printxmldata("sewcloud")
+mdb_user = login_info['user']
+mdb_pass = login_info['passwd']
+mdb_ip = login_info['ip']
+
 get_bouncedb_sql = '''
 	select 
 		distinct d.db_name,c.branch_id
@@ -17,10 +16,8 @@ get_bouncedb_sql = '''
 		c.bounce_db_id=d.db_id
 '''
 
-global_db_host  = "10.1.1.244";
+global_db_host  = mdb_ip;
 global_db_name  = "globalDB_0";
-mdb_user = "root"
-mdb_pass = "EpCAre123"
 
 global_conn = db_helper.connect(global_db_host, mdb_user, mdb_pass, global_db_name, charset='utf8')
 

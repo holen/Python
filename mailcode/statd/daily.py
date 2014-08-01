@@ -3,7 +3,7 @@
 '''
 Created on 2012-3-11
 
-@author: jlcoa
+@author: z
 '''
 import sys, os;
 import re;
@@ -15,6 +15,12 @@ import uuid
 from string import replace
 import random
 import codecs
+import parsexml as parsexml
+
+login_info = parsexml.printxmldata("sewcloud")
+mdb_user = login_info['user']
+mdb_pass = login_info['passwd']
+mdb_ip = login_info['ip']
 
 def exe_sql(connection, sql, closeAfterExecute):
     executor = connection.cursor();
@@ -116,13 +122,14 @@ class Daily(object):
         
         reload(sys);
         
-        self.__global_db_host = "58.23.129.38";
-        self.__archive_db_host = "10.1.1.247";
-        self.__dbUser = "root";
-        self.__dbPass = "EpCAre123";
+        self.__global_db_host = mdb_ip
+        self.__archive_db_host = mdb_ip
+        self.__dbHost = mdb_ip
+        self.__dbUser = mdb_user
+        self.__dbPass = mdb_pass
         
-        self.__report_db_host = '10.1.1.203';
-        self.__list_db_host = '10.1.1.202';
+        self.__report_db_host = mdb_ip
+        self.__list_db_host = mdb_ip
         
         self.__today = datetime.combine(datetime.today(), time(0, 0));
         self.__yestoday = self.__today - timedelta(days=1);
@@ -161,6 +168,7 @@ class Daily(object):
             end_time = self.__today;
         
         conn = MySQLdb.connect(self.__dbHost, self.__dbUser, self.__dbPass, self.global_db_name, charset='utf8');
+        # print self.yestoday_schedule_summary_sql % (start_time, end_time)
         schedule_result = exe_sql(conn, self.yestoday_schedule_summary_sql % (start_time, end_time), False);
         
         print " ".join(("\nMessages scheduled From", str(start_time), 'to', str(end_time), '\n'));
@@ -188,17 +196,17 @@ class Daily(object):
             
         
 #        假如 Unstart Count 为 0， 检查task表的未完成 18号任务
-        print "\nall ids:" + ",".join([str(m[0]) for m in result]);
-        no_unstart_msg_ids = [str(m[0]) for m in result if m[5] == 0 and m[6] == 0];
-        if len(no_unstart_msg_ids):
-            conn = MySQLdb.connect(self.__dbHost, self.__dbUser, self.__dbPass, self.global_db_name, charset='utf8');
-            waiting_msg_ids = exe_sql(conn, self.count_18_task_sql % (",".join(no_unstart_msg_ids)), True);
-            un_normal_ids = filter(lambda id: int(id) not in [column[0] for column in waiting_msg_ids], no_unstart_msg_ids);
-            print "Finished ids:" + ",".join(no_unstart_msg_ids);
-            print "Waiting  ids:" + ",".join([str(id[0]) for id in waiting_msg_ids]);
-            for id in un_normal_ids:
-                print 'direct to report for ' + id;
-            print "\n\n"
+        #print "\nall ids:" + ",".join([str(m[0]) for m in result]);
+        #no_unstart_msg_ids = [str(m[0]) for m in result if m[5] == 0 and m[6] == 0];
+        #if len(no_unstart_msg_ids):
+        #    conn = MySQLdb.connect(self.__dbHost, self.__dbUser, self.__dbPass, self.global_db_name, charset='utf8');
+        #    waiting_msg_ids = exe_sql(conn, self.count_18_task_sql % (",".join(no_unstart_msg_ids)), True);
+        #    un_normal_ids = filter(lambda id: int(id) not in [column[0] for column in waiting_msg_ids], no_unstart_msg_ids);
+        #    print "Finished ids:" + ",".join(no_unstart_msg_ids);
+        #    print "Waiting  ids:" + ",".join([str(id[0]) for id in waiting_msg_ids]);
+        #    for id in un_normal_ids:
+        #        print 'direct to report for ' + id;
+        #    print "\n\n"
             
     
     def priority(self, diff=5, priority=1):
@@ -333,7 +341,7 @@ class Daily(object):
         
         find_tables_sql = 'show tables like "%_ho"';
         sql = r'''
-            select ho.email_address from %s ho into outfile '/home/woo/ho/%s.csv' fields terminated by ',' optionally enclosed by '"' escaped by '"'  lines terminated by '\r\n';
+            select ho.email_address from %s ho into outfile '/home/z/ho/%s.csv' fields terminated by ',' optionally enclosed by '"' escaped by '"'  lines terminated by '\r\n';
         '''
         conn = MySQLdb.connect(self.__report_db_host, self.__dbUser, self.__dbPass, self.report_db_name, charset='utf8');
         to_export = exe_sql(conn, find_tables_sql, False);
@@ -374,7 +382,8 @@ class Daily(object):
                 DATE_FORMAT(m.schedule_time, '%%m-%%d') asc
         '''
             
-        conn = MySQLdb.connect(self.__global_db_host, self.__dbUser, self.__dbPass, self.global_db_name, 60001, charset='utf8');
+        #conn = MySQLdb.connect(self.__global_db_host, self.__dbUser, self.__dbPass, self.global_db_name, 60001, charset='utf8');
+        conn = MySQLdb.connect(self.__global_db_host, self.__dbUser, self.__dbPass, self.global_db_name, charset='utf8');
         splited = exe_sql(conn, find_msg_sql % (start, end), True);
         
         
@@ -454,6 +463,28 @@ class Daily(object):
         print display;
         return display;
         
+    def unfinish(self, mid=None, start_time=None):
+        sql = '''
+            select 
+                ep.client_id,ep.object_id,ep.schedule_time,ep.domain_name,ep.claimed_process,sum(ep.weight)
+            from 
+                email_package ep where ep.task_status_id < 3 
+        '''
+
+        if mid :
+            sql += " and ep.object_id = %s " % mid
+
+        if start_time:
+            sql += ''' and ep.schedule_time >= '%s' ''' % start_time
+
+        if (not mid) and (not start_time):
+            sql += ''' and ep.schedule_time >= '%s' ''' % self.__yestoday
+        
+        sql += ''' group by ep.object_id,ep.domain_name '''
+
+        conn = MySQLdb.connect(self.__dbHost, self.__dbUser, self.__dbPass, self.mesher_db_name, charset='utf8');
+        result = list(exe_sql(conn, sql, True))
+        self.display(['Cid', 'Mid', 'Stime', 'Domain', 'Claimed', 'Weight'], result);
 
 if __name__ == '__main__':
    

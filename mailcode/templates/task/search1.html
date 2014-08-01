@@ -1,0 +1,26 @@
+{% extends "base.html" %} 
+{% block content %}
+
+<div class="row" style="margin:0 0 10px -20px;">
+<div class="span4">
+	<form id="form" class="form-inline" method="post" action="/task/userInfo.html"  style="margin:0px;"> 
+		<div id="form_div">
+			{% csrf_token %}
+            查询客户密码信息：
+            <SCRIPT LANGUAGE="JavaScript"> 
+                function gd()
+                {
+                    document.getElementsByName("txt")[0].value = document.getElementsByName("list")[0].options[document.getElementsByName("list")[0].selectedIndex].text;
+                }
+            </SCRIPT>
+            <select size="1" name="list" onclick=gd()>
+                <option value="cid" selected>cid</option>
+                <option value="email">email</option>
+            </select>
+			<input id="msg" name="txt" type="text" class="input-small" placeholder="cid" >
+			<button class="btn" type="submit">查询</button>
+		</div>
+	</form>
+	</div>
+</div>
+{% endblock %}

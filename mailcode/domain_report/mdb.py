@@ -1,14 +1,16 @@
 '''
 Created on 2012-11-21
 
-@author: woo
+@author: z
 '''
 import MySQLdb as db_helper;
 from datetime import datetime, time, timedelta;
+import parsexml as parsexml
 
-
-mdb_user = "root"
-mdb_pass = "EpCAre123"
+login_info = parsexml.printxmldata("sewcloud")
+mdb_user = login_info['user']
+mdb_pass = login_info['passwd']
+mdb_ip = login_info['ip']
 
 global_db_name  = "globalDB_0";
 mesher_db_name  = "carrierDB_0";
@@ -18,11 +20,11 @@ report_db_name  = 'reportDB_0';
 archive_db_name = 'archiveDB_0';
 list_db_name    = 'listDB_0';
 
-global_db_host  = "10.1.1.244";
-bounce_db_host  = "10.1.1.248";
-list_db_host    = "10.1.1.202";
-report_db_host  = "10.1.1.203";
-archive_db_host = "10.1.1.247"
+global_db_host  = mdb_ip;
+bounce_db_host  = mdb_ip;
+list_db_host    = mdb_ip;
+report_db_host  = mdb_ip;
+archive_db_host = mdb_ip
 
 def get_global_conn():
     return db_helper.connect(global_db_host, mdb_user, mdb_pass, global_db_name, charset='utf8');

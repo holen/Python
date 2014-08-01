@@ -1,14 +1,18 @@
 '''
 Created on 2012-11-21
 
-@author: woo
+@author: holen
 '''
 import MySQLdb as db_helper;
-from datetime import datetime, time, timedelta;
+import getPassword as getpasswd
+import parsexml as parsexml
 
-
-mdb_user = "root"
-mdb_pass = "EpCAre123"
+login_info = parsexml.printxmldata("sewcloud")
+#mdb_user = "epcare"
+mdb_user = login_info['user']
+#mdb_pass = getpasswd.getPassword()
+mdb_pass = login_info['passwd']
+mdb_ip = login_info['ip']
 
 global_db_name  = "globalDB_0";
 mesher_db_name  = "carrierDB_0";
@@ -17,16 +21,20 @@ bounce_db_name_1 = "bounceDB_0"
 report_db_name  = 'reportDB_0';
 archive_db_name = 'archiveDB_0';
 list_db_name    = 'listDB_0';
+resourcedb_name    = 'resource_db';
 
-global_db_host  = "10.1.1.244";
-bounce_db_host  = "10.1.1.248";
-list_db_host    = "10.1.1.202";
-report_db_host  = "10.1.1.203";
-archive_db_host = "10.1.1.247"
-
+global_db_host  = mdb_ip
+resourcedb_host  = mdb_ip
+bounce_db_host  = mdb_ip
+list_db_host    = mdb_ip
+report_db_host  = mdb_ip
+archive_db_host = mdb_ip
 
 def get_global_conn():
     return db_helper.connect(global_db_host, mdb_user, mdb_pass, global_db_name, charset='utf8');
+
+def get_resource_conn():
+    return db_helper.connect(resourcedb_host, mdb_user, mdb_pass, resourcedb_name);
 
 def get_mesher_conn():
     return db_helper.connect(global_db_host, mdb_user, mdb_pass, mesher_db_name, charset='utf8');
@@ -64,6 +72,24 @@ def exe_sql(conn, sql="select 1", use_dict=False, close=False):
     return result;
 
 
+def exe_update_sql(conn, sql="select 1", use_dict=False, close=False, executemany=False, args=None):
+    
+    cursor = conn.cursor(db_helper.cursors.DictCursor) if use_dict else conn.cursor();
+    try:
+        if(executemany):
+            cursor.executemany(sql, args);
+            conn.commit()
+        else:
+            cursor.execute(sql);
+            conn.commit()
+    except Exception,e:
+        conn.rollback()
+        print e 
+    
+    cursor.close();
+    if(close) : 
+        conn.close();
+        
 def exe_sql_with_p(conn, sql="select 1", params = None, use_dict=False, close=False):
     cursor = conn.cursor(db_helper.cursors.DictCursor) if use_dict else conn.cursor();
     cursor.execute(sql, params);
