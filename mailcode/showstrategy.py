@@ -40,7 +40,7 @@ def showshortstrategy():
                 when '756' then 'load4' 
                 when '768,769' then 'load5' 
                 when '766' then 'load6' 
-                end 'load', st.server_ip, st.owner_type, group_concat(st.owner_value) 
+                end 'load', st.resource_ids, st.server_ip, st.owner_type, group_concat(st.owner_value) 
         from 
             strategy st 
         where 
@@ -50,8 +50,8 @@ def showshortstrategy():
     '''
     resource_conn = mdb.get_resource_conn()
     data = list(mdb.exe_sql(resource_conn, sql, False, True))
-    head = ['load', 'server_ip', 'owner_type', 'clients']
-    width = [10] + [20] + [10] + [50]
+    head = ['load', 'rids', 'server_ip', 'owner_type', 'clients']
+    width = [10] + [10] + [20] + [10] + [50]
     nt.display(head,data,width)
 
 if __name__ == '__main__':
