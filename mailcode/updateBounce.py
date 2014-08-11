@@ -17,7 +17,8 @@ def updateBounce(cid, mid, last_rt_id, limit_num):
     '''
 
     bounce_conn = mdb.get_bounce_conn(cid)
-    mdb.exe_update_sql(bounce_conn, sql % (cid, mid, last_rt_id, limit_num), False, True, False, False)
+    row_info = mdb.exe_update_sql(bounce_conn, sql % (cid, mid, last_rt_id, limit_num), False, True, False, False)
+    print row_info
 
 if __name__ == '__main__':
     if len(sys.argv) == 2:
@@ -32,7 +33,6 @@ if __name__ == '__main__':
                 flag = raw_input("There are affect %s rows on messages:%s and the last_rt_id=%s, are you when to continue [y/n]: " % (limit_num, mid, last_rt_id))
                 if flag == 'y':
                     updateBounce(cid, mid, last_rt_id, limit_num)
-                    print "Done! Update message:%s last_rt_id=%s to 1 limit %s" % (mid, last_rt_id, limit_num)
                     break
                 elif flag == 'n':
                     print "Nothing is dode !"

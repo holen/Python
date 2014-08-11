@@ -12,7 +12,8 @@ def updateresource(src,tag):
     '''
 
     resource_conn = mdb.get_resource_conn()
-    mdb.exe_sql(resource_conn, sql % (src, tag, resource_ids), False, True)
+    row_info = mdb.exe_update_sql(resource_conn, sql % (src, tag, resource_ids), False, True, False, False)
+    print row_info
 
 if __name__ == '__main__':
     if len(sys.argv) == 2:

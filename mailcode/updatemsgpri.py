@@ -14,27 +14,32 @@ def selectMessage(mid):
     '''
     carrier_conn = mdb.get_mesher_conn()
     data = mdb.exe_sql(carrier_conn, select_sql % (mid), False, True)
-    print data[0]
+    return data[0]
 
-def pauseMessage(mid):
+def updatemsgpri(mid):
     update_sql = '''
         update 
             email_package ep 
         set 
-            ep.task_status_id = 5 
+            ep.priority = 0
         where 
             ep.task_status_id = 0 and ep.object_id = %s
     '''
-    carrier_conn = mdb.get_mesher_conn()
-    mdb.exe_update_sql(carrier_conn, update_sql % (mid), False, True, False, False)
+    try:
+        carrier_conn = mdb.get_mesher_conn()
+        row_info = mdb.exe_update_sql(carrier_conn, update_sql % (mid), False, True, False, False)
+        print row_info
+    except Exception,e:
+        print e 
+        sys.exit()
 
 if __name__ == '__main__':
     if len(sys.argv) == 2:
         if sys.argv[1] == '-h':
-            print("暂停邮件\nUsage: python %s mid "% sys.argv[0]);
+            print("修改邮件优先级\nUsage: python %s mid "% sys.argv[0]);
         else:
             mid = sys.argv[1] 
-            selectMessage(mid)
-            pauseMessage(mid)
+            count = selectMessage(mid)
+            updatemsgpri(mid)
     else:
-        print("暂停邮件\nUsage: python %s mid "% sys.argv[0]);
+        print("修改邮件优先级\nUsage: python %s mid "% sys.argv[0]);

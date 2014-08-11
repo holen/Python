@@ -15,7 +15,8 @@ def deloldstg(cid):
     sql = " delete from strategy where domain_key = 'qqdomain' and owner_value = %s " 
     try:
         resource_conn = mdb.get_resource_conn()
-        mdb.exe_update_sql(resource_conn, sql % (cid), False, True, False, False)
+        row_info = mdb.exe_update_sql(resource_conn, sql % (cid), False, True, False, False)
+        print row_info
     except Exception,e:
         print e
         sys.exit()
@@ -59,7 +60,8 @@ def insertnewstg(cid, load_id):
     sql = sql_dict[load_id]
     try:
         resource_conn = mdb.get_resource_conn()
-        mdb.exe_update_sql(resource_conn, sql % (cid), False, True, False, False)
+        row_info = mdb.exe_update_sql(resource_conn, sql % (cid), False, True, False, False)
+        print row_info
     except Exception,e:
         print e
         sys.exit()
@@ -83,7 +85,7 @@ if __name__ == '__main__':
                         insertnewstg(cid, load_id)
                         print "Done! Add a new strategy on client_id: %s on load_%s " % (cid, load_id)
                     break
-                elif flag == 'n':
+                elif raw_txt == 'n':
                     print "Nothing is dode !"
                     break
                 else:

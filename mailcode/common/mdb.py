@@ -79,9 +79,11 @@ def exe_update_sql(conn, sql="select 1", use_dict=False, close=False, executeman
         if(executemany):
             cursor.executemany(sql, args);
             conn.commit()
+            return cursor._info
         else:
             cursor.execute(sql);
             conn.commit()
+            return cursor._info
     except Exception,e:
         conn.rollback()
         print e 
