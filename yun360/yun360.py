@@ -16,6 +16,7 @@ import hashlib
 import json
 import re
 import os
+import poster
  
 class loginYunPan():
  
@@ -67,7 +68,7 @@ class loginYunPan():
         queryString = urllib.urlencode(login)
         url += queryString
         result = urllib2.urlopen(url).read()
-        print "result2 : %s" % result
+        #print "result2 : %s" % result
         result = result.strip(' ')
         result = json.loads(result[5:-1])
         token = ''
@@ -105,7 +106,7 @@ class loginYunPan():
         queryString = urllib.urlencode(login)
         url += queryString
         result = urllib2.urlopen(url).read()
-        print "result3 : %s" % result
+        #print "result3 : %s" % result
         result = result.replace("\n", '').strip(' ')
         result = json.loads(result[5:-1])
         userinfo = {}
@@ -126,10 +127,10 @@ class loginYunPan():
         '''
         url = 'http://yunpan.360.cn/user/login?st=163'
         result = urllib2.urlopen(url).read()
-        print "result1 : %s" % result
+        #print "result1 : %s" % result
         regx = "web : '([^']*)'"
         server = re.findall(regx, result)
-        print "server: %s" % server
+        #print "server: %s" % server
         if len(server) and server[0] != '' > 0:
             print "Get Server Success, Server Address:" + server[0]
             self.serverAddr = server[0]
@@ -167,8 +168,40 @@ class loginYunPan():
         md5 = hashlib.md5()
         md5.update(password)
         return md5.hexdigest()
+    
+    def upload(self, qid, token):
+        '''
+            上传文件
+        '''
+        p = {
+                'qid': qid,
+                'ofmt': 'json',
+                'method': 'Upload.web',
+                'token': token,
+                'v': '1.0.1',
+                'devtype': 'web',
+                'pid': 'ajax',
+                'Filename': 'ks.cfg',
+                'path': '/edata/',
+                'file': open('ks.cfg', 'rb'),
+                'Upload': 'Submit Query'
+                }
+
+        url = "http://up43.yunpan.360.cn/webupload?devtype=web"
+        datagen, headers = poster.encode.multipart_encode(p)
+        opener = poster.streaminghttp.register_openers()
+        opener.add_handler(urllib2.HTTPCookieProcessor(self.cookie_jar))
+        urllib2.urlopen(urllib2.Request(url, datagen, headers)).read()
+        url_list = "http://c69.yunpan.360.cn/file/list"
+        headers_list = {'User-Agent': 'Mozilla/5.0 (Windows NT 6.1) AppleWebKit/537.1 (KHTML, like Gecko) Chrome/21.0.1180.89 Safari/537.1'}
+        datagen_dict = {'type': 2, 't': '0.3556266035595015', 'ajax': 1, 'field': 'file_name', 'order': 'asc', 'page': 0, 'page_size': 300, 'path': '/edata/'}
+        datagen_list = urllib.urlencode(datagen_dict)
+        opener.open(urllib2.Request(url_list, datagen_list, headers_list)).read().decode('utf8')
  
 if __name__ == '__main__':
     login = loginYunPan()
     userinfo = login.run('holen2014', 'holen2013')
+    qid = userinfo['qid']
+    token = login.getToken('holen2014')
+    login.upload(qid, token)
     print userinfo
