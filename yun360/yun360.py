@@ -200,7 +200,7 @@ class loginYunPan():
  
 if __name__ == '__main__':
     login = loginYunPan()
-    userinfo = login.run('holen2014', 'holen2013')
+    userinfo = login.run('holen2014', 'abcd1234')
     qid = userinfo['qid']
     token = login.getToken('holen2014')
     login.upload(qid, token)
