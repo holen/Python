@@ -11,8 +11,8 @@ def showshortstrategy():
                 when '747' then 'load2' 
                 when '764' then 'load3' 
                 when '756' then 'load4' 
-                when '768,769' then 'load5' 
-                when '766' then 'load6' 
+                when '777' then 'load5' 
+                when '776' then 'load6' 
                 end 'load', st.server_ip, st.owner_type, group_concat(st.owner_value) as client_list
         from 
             strategy st 
@@ -42,7 +42,7 @@ def sendinfo(start_time, end_time, client_list, group_by=False):
 
 def getclients(branch_id):
     sql = '''
-        select group_concat(c.client_id) as clients from client c where c.branch_id = %d
+        select group_concat(c.client_id) as clients from client c where c.branch_id in (%s)
     '''
     global_conn = mdb.get_global_conn()
     others_clients = mdb.exe_sql(global_conn, sql % (branch_id), True, True)
@@ -55,7 +55,8 @@ def showreport(start_time, end_time, group_by=False):
         load = data['load']
         client_list = data['client_list']
         if data['owner_type'] == 'Branch':
-            others_clients = getclients(int(data['client_list']))
+            branchs = data['client_list']
+            others_clients = getclients(branchs)
             client_list = client_list + ',' + others_clients
         results = sendinfo(start_time, end_time, client_list, group_by)
         for result in results:

@@ -4,7 +4,8 @@
 import common.mdb as mdb
 import sys
 
-resource_ids="738,739,740"
+#resource_ids="738,739,740"
+resource_ids="770,771,772"
 
 def updateresource(src,tag):
     sql = '''

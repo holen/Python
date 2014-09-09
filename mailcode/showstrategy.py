@@ -14,8 +14,8 @@ def showstrategy():
                 when '747' then '通道2' 
                 when '764' then '通道3' 
                 when '756' then '通道4' 
-                when '768,769' then '通道5' 
-                when '766' then '通道6' 
+                when '777' then '通道5' 
+                when '776' then '通道6' 
                 else '其他通道' end 'load'
         from 
             strategy st 
@@ -38,8 +38,8 @@ def showshortstrategy():
                 when '747' then 'load2' 
                 when '764' then 'load3' 
                 when '756' then 'load4' 
-                when '768,769' then 'load5' 
-                when '766' then 'load6' 
+                when '777' then 'load5' 
+                when '776' then 'load6' 
                 end 'load', st.resource_ids, st.server_ip, st.owner_type, group_concat(st.owner_value) 
         from 
             strategy st 
