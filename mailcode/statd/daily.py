@@ -89,7 +89,7 @@ class Daily(object):
     
     unfinished_msg_summary_sql = '''
         select 
-            m.message_id, DATE_FORMAT(m.schedule_time, '%%m-%%d %%k:%%i'), m.send_round, m.send_count
+            m.client_id, m.message_id, DATE_FORMAT(m.schedule_time, '%%m-%%d %%k:%%i'), m.send_round, m.send_count
         from 
             message m
         where 
@@ -175,13 +175,15 @@ class Daily(object):
         self.display(['Finished', 'Finished amount', 'Unfinished', 'Unfinished amount'], schedule_result);
         
         unfinished_msg_result = list(exe_sql(conn, self.unfinished_msg_summary_sql % (start_time, end_time), True));
+	#print unfinished_msg_result
         
         result = [];
         if len(unfinished_msg_result) > 0:
             
-            unfinished_msg_id = [str(i[0]) for i in unfinished_msg_result];
+            unfinished_msg_id = [str(i[1]) for i in unfinished_msg_result];
             conn = MySQLdb.connect(self.__dbHost, self.__dbUser, self.__dbPass, self.mesher_db_name, charset='utf8');
             detail_result = exe_sql(conn, self.unfinished_msg_detail_sql % (",".join(unfinished_msg_id)), True);
+	    #print detail_result
             result = map(lambda x, y : list(x) + list(y) , list(unfinished_msg_result), list(detail_result));
             
 #            result = [];
@@ -192,7 +194,7 @@ class Daily(object):
             tr_result = map(list, zip(*result));
             result.append(['total', '', ''] + map(sum, tr_result[3:]));
             
-            self.display(['Mid', 'Schedule on', 'Round', 'Send Count', 'Finished', 'Sending', 'Unstart'], result);
+            self.display(['Cid', 'Mid', 'Schedule on', 'Round', 'Send Count', 'Finished', 'Sending', 'Unstart'], result);
             
         
 #        假如 Unstart Count 为 0， 检查task表的未完成 18号任务

@@ -28,7 +28,7 @@ archive_db_host = mdb_ip
 admin_db_host = mdb_ip
 
 def get_global_conn():
-    return db_helper.connect(global_db_host, mdb_user, mdb_pass, global_db_name, charset='utf8');
+    return db_helper.connect(global_db_host, mdb_user, mdb_pass, global_db_name, charset='utf8', use_unicode=True);
 
 def get_admin_conn():
     return db_helper.connect(admin_db_host, mdb_user, mdb_pass, admin_db_name, charset='utf8');

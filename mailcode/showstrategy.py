@@ -4,19 +4,19 @@
 import common.mdb as mdb
 import mytexttable as nt
 import sys
+from getloadstr import showLoadInfo
+
+def getload():
+    load = {}
+    loadinfos = showLoadInfo()
+    for loadinfo in loadinfos:
+        load[loadinfo['rids']] = loadinfo['domains'].split(".")[0]
+    return load
 
 def showstrategy():
     sql = '''
         select 
-            st.server_id,st.domain_key,st.resource_ids,st.owner_type,st.owner_value,st.for_test_msg,
-            case st.resource_ids 
-                when '765' then '通道1' 
-                when '747' then '通道2' 
-                when '764' then '通道3' 
-                when '756' then '通道4' 
-                when '777' then '通道5' 
-                when '776' then '通道6' 
-                else '其他通道' end 'load'
+            st.server_id,st.domain_key,st.resource_ids,st.owner_type,st.owner_value,st.for_test_msg
         from 
             strategy st 
         where 
@@ -26,21 +26,13 @@ def showstrategy():
     '''
 
     resource_conn = mdb.get_resource_conn()
-    data = list(mdb.exe_sql(resource_conn, sql, False, True))
-    head = ['server_id', 'domain', 'rid', 'o_type', 'o_value', 'isTest', '通道']
-    width = [11] * 7
-    nt.display(head,data,width)
+    datas = list(mdb.exe_sql(resource_conn, sql, True, True))
+    return datas
 
 def showshortstrategy():
     sql = '''
-        select case st.resource_ids 
-                when '765' then 'load1' 
-                when '747' then 'load2' 
-                when '764' then 'load3' 
-                when '756' then 'load4' 
-                when '777' then 'load5' 
-                when '776' then 'load6' 
-                end 'load', st.resource_ids, st.server_ip, st.owner_type, group_concat(st.owner_value) 
+        select 
+            st.resource_ids, st.server_ip, st.owner_type, group_concat(st.owner_value) as owner_values
         from 
             strategy st 
         where 
@@ -49,18 +41,25 @@ def showshortstrategy():
             st.resource_ids, st.owner_type
     '''
     resource_conn = mdb.get_resource_conn()
-    data = list(mdb.exe_sql(resource_conn, sql, False, True))
-    head = ['load', 'rids', 'server_ip', 'owner_type', 'clients']
-    width = [10] + [10] + [20] + [10] + [50]
-    nt.display(head,data,width)
+    datas = list(mdb.exe_sql(resource_conn, sql, True, True))
+    return datas
 
 if __name__ == '__main__':
     if len(sys.argv) == 2 :
         if sys.argv[1] == '-r':
-            showshortstrategy()
+            datas = showshortstrategy()
+            load = getload()
+            print '''\n     load   resource_ids    server_ip   owner_type  owner_values \n'''
+            for data in datas:
+                print '%10s %10s %15s %10s %15s \n' % (load[data['resource_ids']], data['resource_ids'], data['server_ip'], data['owner_type'], data['owner_values'])
         elif sys.argv[1] == '-h':
             print("查询通道信息\nUsage: python %s [-r] " % sys.argv[0]);
             sys.exit()
     else :
-        showstrategy()
+        datas = showstrategy()
+        load = getload()
+        print '''\n     load    server_id       domain_key    rids   owner_type  owner_values from_test_msg\n'''
+        for data in datas:
+            print '%10s %15s %10s %10s %10s %10s %10s \n' % (load[data['resource_ids']], data['server_id'], data['domain_key'], data['resource_ids'], data['owner_type'], data['owner_value'], data['for_test_msg'])
+        #getload()
         sys.exit()

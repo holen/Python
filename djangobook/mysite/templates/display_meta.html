@@ -1,0 +1,12 @@
+{% extends "base.html" %}
+
+{% block title %}The meta info{% endblock %}
+
+{% block content %}
+<p>Welcome to the page at {{path}} . </p>
+<table>
+{% for k, v in metas.items %}
+<tr><td>{{k}}</td><td>{{v}}</td></tr>
+{% endfor %}
+</table>
+{% endblock %}

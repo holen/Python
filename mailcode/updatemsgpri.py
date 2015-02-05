@@ -21,7 +21,7 @@ def updatemsgpri(mid):
         update 
             email_package ep 
         set 
-            ep.priority = 0
+            ep.priority = 1
         where 
             ep.task_status_id = 0 and ep.object_id = %s
     '''

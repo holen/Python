@@ -34,7 +34,7 @@ def get_error_conn():
     return db_helper.connect(day_report_host, 'report', 'qwer1234', day_report_name, charset='utf8');
 
 def get_global_conn():
-    return db_helper.connect(global_db_host, mdb_user, mdb_pass, global_db_name, charset='utf8');
+    return db_helper.connect(global_db_host, mdb_user, mdb_pass, global_db_name, charset='utf8', use_unicode=True);
 
 def get_mesher_conn():
     return db_helper.connect(global_db_host, mdb_user, mdb_pass, mesher_db_name, charset='utf8');

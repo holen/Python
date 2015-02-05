@@ -1,0 +1,310 @@
+Python之自动单元测试之一（unittest使用实例）
+http://www.cnblogs.com/berlin-sun/p/UnitTestInPython.html
+
+软件的测试是一件非常乏味的事情，在测试别人编写的软件时尤其如此，程序员通常都只对编写代码感兴趣，而不喜欢文档编写和软件测试这类"没有创新"的工作。既然如此，为什么不让程序员在编写软件时自己加入一些用于测试的代码，使测试过程自动化呢？在软件工程中，这一技术称为自动单元测试，本文介绍在用Python开发软件时如何实现这一目标。
+一、软件测试
+
+大型软件系统的开发是一个很复杂的过程，其中因为人的因素而所产生的错误非常多，因此软件在开发过程必须要有相应的质量保证活动，而软件测试则是保证质量的关键措施。正像软件熵（software entropy）所描述的那样：一个程序从设计很好的状态开始，随着新的功能不断地加入，程序逐渐地失去了原有的结构，最终变成了一团乱麻（其实最初的"很好的状态"得加个问号）。测试的目的说起来其实很简单也极具吸引力，那就是写出高质量的软件并解决软件熵这一问题。
+
+可惜的是，软件开发人员很少能在编码的过程中就进行软件测试，大部分软件项目都只在最终验收时才进行测试，有些项目甚至根本没有测试计划！随着软件质量意识的增强，许多软件开发组织开始转向UML、CMM、RUP、XP等软件工程方法，以期提高软件质量，并使软件开发过程更加可控，好在这些方法对测试都提出了很严格的要求，从而使得测试在软件开发过程的作用开始真正体现出来。
+
+软件测试作为一种系统工程，涉及到整个软件开发过程的各个方面，需要管理人员、设计人员、开发人员和测试人员的共同努力。作为软件开发过程中的主要力量，现今的程序员除了要编写实现代码外，还承担着单元测试这一艰巨任务，因此必须采用新的工作模式：
+
+    编写和维护一套详尽的单元测试用例；
+    先构造单元测试和验收测试用例，然后再编写代码；
+    根据构造的测试用例来编写代码。
+
+单元测试负责对最小的软件设计单元（模块）进行验证，它使用软件设计文档中对模块的描述作为指南，对重要的程序分支进行测试以发现模块中的错误。由于软件模块并不是一个单独的程序，为了进行单元测试还必须编写大量额外的代码，从而无形中增加了开发人员的工作量，目前解决这一问题比较好的方法是使用测试框架。测试框架是在用XP方法进行单元测试时的关键，尤其是在需要构造大量测试用例时更是如此，因为如果完全依靠手工的方式来构造和执行这些测试，肯定会变成一个花费大量时间并且单调无味的工作，而测试框架则可以很好地解决这些问题。
+
+使用Python语言的开发人员可以使用Steve Purcell编写的PyUnit作为单元测试框架，通过将单元测试融合到PyUnit这一测试框架里，Python程序员可以更容易地增加、管理、执行测试用例，并对测试结果进行分析。此外，使用PyUnit还可以实现自动单元测试（回归测试）。
+二、规范Python单元测试
+
+测试是一个贯穿于整个开发过程的连续过程，从某个意义上说，软件开发的过程实际上就是测试过程。正如Martin Fowler所说的"在你不知道如何测试代码之前，就不该编写程序。而一旦你完成了程序，测试代码也应该完成。除非测试成功，你不能认为你编写出了可以工作的程序。"
+
+测试最基本的原理就是比较预期结果是否与实际执行结果相同，如果相同则测试成功，否则测试失败。为了更好地理解PyUnit这一自动测试框架的作用，先来看一个简单的例子，假设我们要对例1中的Widget类进行测试：
+复制代码
+
+例1. widget.py
+# 将要被测试的类
+class Widget:
+    def __init__(self, size = (40, 40)):
+        self._size = size
+    def getSize(self):
+        return self._size
+    def resize(self, width, height):
+        if width  0  or height < 0:
+            raise ValueError, "illegal size"
+        self._size = (width, height)
+    def dispose(self):
+        pass
+
+复制代码
+
+采用手工方式进行单元测试的Python程序员很可能会写出类似例2的测试代码来，
+复制代码
+
+例2. manual.py
+from widget import Widget
+# 执行测试的类
+class TestWidget:
+    def testSize(self):
+        expectedSize = (40, 40);
+        widget = Widget()
+        if widget.getSize() == expectedSize:
+            print "test [Widget]: getSize works perfected!"
+        else:
+            print "test [Widget]: getSize doesn't work!"
+# 测试
+if __name__ == '__main__':
+    myTest = TestWidget()
+    myTest.testSize()
+
+复制代码
+
+稍一留心你不难发现这种手工测试方法存在许多问题。首先，测试程序的写法没有一定的规范可以遵循，十个程序员完全可能写出十种不同的测试程序来，如果每个Python程序员都有自己不同的设计测试类的方法，光维护被测试的类就够麻烦了，谁还顾得上维护测试类。其次，需要编写大量的辅助代码才能进行单元测试，例1中用于测试的代码甚至比被测试的代码还要多，而这毫无疑问将增大Python程序员的工作量。
+
+为了让单元测试代码能够被测试和维护人员更容易地理解，最好的解决办法是让开发人员遵循一定的规范来编写用于测试的代码，具体到Python程序员来讲，则是要采用PyUnit这一自动测试框架来构造单元测试用例。目前PyUnit已经得到了大多数Python开发人员的认可，成了事实上的单元测试标准。如果采用PyUnit来进行同样的测试，则测试代码将如例3所示：
+复制代码
+
+例3. auto.py
+from widget import Widget
+import unittest
+# 执行测试的类
+class WidgetTestCase(unittest.TestCase):
+    def setUp(self):
+        self.widget = Widget()
+    def tearDown(self):
+        self.widget = None
+    def testSize(self):
+        self.assertEqual(self.widget.getSize(), (40, 40))
+# 构造测试集
+def suite():
+    suite = unittest.TestSuite()
+    suite.addTest(WidgetTestCase("testSize"))
+    return suite
+# 测试
+if __name__ == "__main__":
+    unittest.main(defaultTest = 'suite')
+
+复制代码
+
+在采用PyUnit这一单元测试框架后，用于测试的代码做了相应的改动：
+
+    用import语句引入unittest模块。
+    让所有执行测试的类都继承于TestCase类，可以将TestCase看成是对特定类进行测试的方法的集合。
+    在setUp()方法中进行测试前的初始化工作，并在tearDown()方法中执行测试后的清除工作，setUp()和tearDown()都是TestCase类中定义的方法。
+    在testSize()中调用assertEqual()方法，对Widget类中getSize()方法的返回值和预期值进行比较，确保两者是相等的，assertEqual()也是TestCase类中定义的方法。
+    提供名为suite()的全局方法，PyUnit在执行测试的过程调用suit()方法来确定有多少个测试用例需要被执行，可以将TestSuite看成是包含所有测试用例的一个容器。
+
+虽然看起来有点复杂，但PyUnit使得所有的Python程序员都可以使用同样的单元测试方法，测试过程不再是杂乱无章的了，而是在同一规范指导下进行的有序行为，这就是使用PyUnit这一自动单元测试框架所带来的最大好处。
+
+好了，现在进入我们的学习重点，PyUnit模块的使用！
+三、自动测试框架PyUnit
+
+在对软件测试理论和PyUnit有了一个大致了解之后，下面辅以具体的实例介绍Python程序员如何借助PyUnit来进行单元测试。在Python中进行单元测试时需要用到PyUnit模块，Python 2.1及其以后的版本都将PyUnit作为一个标准模块，可以导入相应模块，使用即可。
+3.1 测试用例TestCase
+
+软件测试中最基本的组成单元是测试用例（test case），PyUnit使用TestCase类来表示测试用例，并要求所有用于执行测试的类都必须从该类继承。TestCase子类实现的测试代码应该是自包含（self contained）的，也就是说测试用例既可以单独运行，也可以和其它测试用例构成集合共同运行。
+
+TestCase在PyUnit测试框架中被视为测试单元的运行实体，Python程序员可以通过它派生自定义的测试过程与方法（测试单元），利用Command和Composite设计模式，多个TestCase还可以组合成测试用例集合。PyUnit测试框架在运行一个测试用例时，TestCase子类定义的setUp()、runTest()和tearDown()方法被依次执行，最简单的测试用例只需覆盖runTest()方法来执行特定的测试代码就可以了，如例4所示：
+复制代码
+
+例4. static_single.py
+import unittest
+# 执行测试的类
+class WidgetTestCase(unittest.TestCase):
+    def runTest(self):
+        widget = Widget()
+        self.assertEqual(widget.getSize(), (40, 40))
+
+复制代码
+
+而要在PyUnit测试框架中构造上述WidgetTestCase类的一个实例，应该不带任何参数调用其构造函数:
+
+testCase = WidgetTestCase()
+
+一个测试用例通常只对软件模块中的一个方法进行测试，采用覆盖runTest()方法来构造测试用例在PyUnit中称为静态方法，如果要对同一个软件模块中的多个方法进行测试，通常需要构造多个执行测试的类，如例5所示：
+复制代码
+
+例5. static_multi.py
+import unittest
+# 测试getSize()方法的测试用例
+class WidgetSizeTestCase(unittest.TestCase):
+    def runTest(self):
+        widget = Widget()
+        self.assertEqual(widget.getSize(), (40, 40))
+# 测试resize()方法的测试用例
+class WidgetResizeTestCase(unittest.TestCase):
+    def runTest(self):
+        widget = Widget()
+        widget.resize(100, 100)
+        self.assertEqual(widget.getSize(), (100, 100))
+
+复制代码
+
+采用静态方法，Python程序员不得不为每个要测试的方法编写一个测试类（该类通过覆盖runTest()方法来执行测试），并在每一个测试类中生成一个待测试的对象。在为同一个软件模块编写测试用例时，很多时候待测对象有着相同的初始状态，因此采用上述方法的Python程序员不得不在每个测试类中为待测对象进行同样的初始化工作，而这往往是一项费时且枯燥的工作。
+
+一种更好的解决办法是采用PyUnit提供的动态方法，只编写一个测试类来完成对整个软件模块的测试，这样对象的初始化工作可以在setUp()方法中完成，而资源的释放则可以在tearDown()方法中完成，如例6所示：
+复制代码
+
+例6. dynamic.py
+import unittest
+# 执行测试的类
+class WidgetTestCase(unittest.TestCase):
+    def setUp(self):
+        self.widget = Widget()
+    def tearDown(self):
+        self.widget.dispose()
+        self.widget = None
+    def testSize(self):
+        self.assertEqual(self.widget.getSize(), (40, 40))
+    def testResize(self):
+        self.widget.resize(100, 100)
+        self.assertEqual(self.widget.getSize(), (100, 100))
+
+复制代码
+
+采用动态方法最大的好处是测试类的结构非常好，用于测试一个软件模块的所有代码都可以在同一个类中实现。动态方法不再覆盖runTest()方法，而是为测试类编写多个测试方法（按习惯这些方法通常以test开头），在创建TestCase子类的实例时必须给出测试方法的名称，来为PyUnit测试框架指明运行该测试用例时究竟应该调用测试类中的哪个方法：
+
+sizeTestCase = WidgetTestCase("testSize")
+resizeTestCase = WidgetTestCase("testResize")
+
+3.2 测试用例集TestSuite
+
+完整的单元测试很少只执行一个测试用例，开发人员通常都需要编写多个测试用例才能对某一软件功能进行比较完整的测试，这些相关的测试用例称为一个测试用例集，在PyUnit中是用TestSuite类来表示的。
+
+在创建了一些TestCase子类的实例作为测试用例之后，下一步要做的工作就是用TestSuit类来组织它们。PyUnit测试框架允许Python程序员在单元测试代码中定义一个名为suite()的全局函数，并将其作为整个单元测试的入口，PyUnit通过调用它来完成整个测试过程。
+
+def suite():
+    suite = unittest.TestSuite()
+    suite.addTest(WidgetTestCase("testSize"))
+    suite.addTest(WidgetTestCase("testResize"))
+    return suite
+
+也可以直接定义一个TestSuite的子类，并在其初始化方法（__init__）中完成所有测试用例的添加：
+
+class WidgetTestSuite(unittest.TestSuite):
+    def __init__(self):
+        unittest.TestSuite.__init__(self, map(WidgetTestCase,
+                                              ("testSize",
+                                               "testResize")))
+
+这样只需要在suite()方法中返回该类的一个实例就可以了：
+
+def suite():
+    return WidgetTestSuite()
+
+如果用于测试的类中所有的测试方法都以test开，Python程序员甚至可以用PyUnit模块提供的makeSuite()方法来构造一个TestSuite：
+
+def suite():
+    return unittest.makeSuite(WidgetTestCase, "test")
+
+在PyUnit测试框架中，TestSuite类可以看成是TestCase类的一个容器，用来对多个测试用例进行组织，这样多个测试用例可以自动在一次测试中全部完成。事实上，TestSuite除了可以包含TestCase外，也可以包含TestSuite，从而可以构成一个更加庞大的测试用例集：
+
+suite1 = mysuite1.TheTestSuite()
+suite2 = mysuite2.TheTestSuite()
+alltests = unittest.TestSuite((suite1, suite2))
+
+3.3 实施测试
+
+编写测试用例（TestCase）并将它们组织成测试用例集（TestSuite）的最终目的只有一个：实施测试并获得最终结果。PyUnit使用TestRunner类作为测试用例的基本执行环境，来驱动整个单元测试过程。Python开发人员在进行单元测试时一般不直接使用TestRunner类，而是使用其子类TextTestRunner来完成测试，并将测试结果以文本方式显示出来：
+
+runner = unittest.TextTestRunner()
+runner.run(suite)
+
+使用TestRunner来实施测试的例子如例7所示，
+复制代码
+
+例7. text_runner.py
+from widget import Widget
+import unittest
+# 执行测试的类
+class WidgetTestCase(unittest.TestCase):
+    def setUp(self):
+        self.widget = Widget()
+    def tearDown(self):
+        self.widget.dispose()
+        self.widget = None
+    def testSize(self):
+        self.assertEqual(self.widget.getSize(), (40, 40))
+    def testResize(self):
+        self.widget.resize(100, 100)        
+        self.assertEqual(self.widget.getSize(), (100, 100))        
+# 测试
+if __name__ == "__main__":
+    # 构造测试集
+    suite = unittest.TestSuite()
+    suite.addTest(WidgetTestCase("testSize"))
+    suite.addTest(WidgetTestCase("testResize"))
+    
+    # 执行测试
+    runner = unittest.TextTestRunner()
+    runner.run(suite)
+
+复制代码
+
+运行结果应该如下所示，表明执行了2个测试用例，并且两者都通过了测试：
+
+..
+----------------------------------------------------------------------
+Ran 2 tests in 0.000s
+OK
+
+如果对数据进行修改，模拟出错的情形，将会得到如下结果：
+复制代码
+
+.F
+==========================================
+FAIL: testResize (__main__.WidgetTestCase)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "text_runner.py", line 15, in testResize
+    self.assertEqual(self.widget.getSize(), (200, 100))
+  File "/usr/lib/python2.2/unittest.py", line 286, in failUnlessEqual
+    raise self.failureException, \
+AssertionError: (100, 100) != (200, 100)
+----------------------------------------------------------------------
+Ran 2 tests in 0.001s
+FAILED (failures=1)
+
+复制代码
+
+默认情况下，TextTestRunner将结果输出到sys.stderr上，但如果在创建TextTestRunner类实例时将一个文件对象传递给了构造函数，则输出结果将被重定向到该文件中。在Python的交互环境中驱动单元测试时，使用TextTestRunner类是一个不错的选择。
+
+PyUnit模块中定义了一个名为main的全局方法，使用它可以很方便地将一个单元测试模块变成可以直接运行的测试脚本，main()方法使用TestLoader类来搜索所有包含在该模块中的测试方法，并自动执行它们。如果Python程序员能够按照约定（以test开头）来命名所有的测试方法，那就只需要在测试模块的最后加入如下几行代码即可：
+
+if __name__ == "__main__":
+    unittest.main()
+
+使用main()方法来实施测试的例子如例8所示:
+复制代码
+
+例8. main_runner.py
+from widget import Widget
+import unittest
+# 执行测试的类
+class WidgetTestCase(unittest.TestCase):
+    def setUp(self):
+        self.widget = Widget()
+    def tearDown(self):
+        self.widget.dispose()
+        self.widget = None
+    def testSize(self):
+        self.assertEqual(self.widget.getSize(), (40, 40))
+    def testResize(self):
+        self.widget.resize(100, 100)
+        self.assertEqual(self.widget.getSize(), (100, 100))   
+# 测试
+if __name__ == "__main__":
+    unittest.main()
+
+复制代码
+
+为了使单元测试更具亲合力，PyUnit软件包中还提供了一个图形界面测试脚本unittestgui.py，将其复制到当前目录后，可以执行下面的命令来启动该测试工具，对main_runner.py脚本中的所有测试用例进行测试：
+
+python unittestgui.py main_runner
+
+四、小结
+
+测试是保证软件质量的关键，新的软件开发方法要求程序员在编写代码前先编写测试用例，并在软件开发过程中不断地进行单元测试，从而最大限度地减少缺陷(Bug)的产生。软件单元测试是XP方法的基石，测试框架为程序员进行单元测试提供了统一的规范，Python程序员可以使用PyUnit作为软件开发过程中的自动单元测试框架。
+

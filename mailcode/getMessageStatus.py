@@ -47,7 +47,7 @@ def getMsgInfo(message_id):
     global_conn = mdb.get_global_conn()
     datas = mdb.exe_sql(global_conn, message_info_sql % (message_id), True, True)
     print datas[0]['subject']
-    #print datas[0].values()
+    print datas[0]['status_id']
     #width = [10] * 14   
     #mytt.display(['cid', 'mid', 'subject', 's_id', 'f_addree', 's_time', 'totol', 'send', 'succ', 'soft', 'hard', 'unstart', 'open', 'click'], datas, width)
 
