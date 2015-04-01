@@ -1,0 +1,7 @@
+REMOTEHOST = '36.250.69.2'
+LOCALDIR = '/data/git/python/mailcode/'
+REMOTEDIR = '/data/mailcode/'
+
+task :deploy do
+    sh "rsync -e 'ssh -p 20322' -av #{LOCALDIR} #{REMOTEHOST}:#{REMOTEDIR}"
+end

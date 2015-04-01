@@ -8,12 +8,13 @@ def showshortstrategy():
     sql = '''
         select case st.resource_ids 
                 when '764,776' then '通道1' 
-                when '765,777' then '通道1' 
-                when '747,756' then '通道2' 
-                when '782,780,781' then '通道2' 
-                when '796' then '通道2' 
-                when '797,798' then '通道3' 
-                when '794,795' then '通道4' 
+                when '756,797' then '通道2' 
+                when '781' then '通道3' 
+                when '765,777' then '通道4' 
+                when '747' then '通道6' 
+                when '780' then '通道7' 
+                when '782' then '通道8' 
+                when '798' then '通道9' 
                 end 'load', st.server_ip, st.owner_type, group_concat(st.owner_value) as client_list
         from 
             strategy st 

@@ -9,6 +9,7 @@ from getloadstr import showLoadInfo
 def getload():
     load = {}
     loadinfos = showLoadInfo()
+    #print loadinfos
     for loadinfo in loadinfos:
         load[loadinfo['rids']] = loadinfo['domains'].split(".")[0]
     return load
@@ -20,7 +21,7 @@ def showstrategy():
         from 
             strategy st 
         where 
-            st.domain_key = 'qqdomain' and st.owner_value not like '-%' 
+            st.domain_key = 'qqdomain' and st.owner_value not like '-%' and owner_type <> 'Common'
         order by 
             st.resource_ids 
     '''
