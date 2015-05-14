@@ -12,11 +12,11 @@ def get_nodevalue(node, index = 0):
 def get_xmlnode(node,name):
     return node.getElementsByTagName(name) if node else []
 
-def xml_to_string(filename='/root/bin/sewcloud.xml'):
+def xml_to_string(filename='/etc/sewcloud.xml'):
     doc = minidom.parse(filename)
     return doc.toxml('UTF-8')
 
-def get_xml_data(filename='/root/bin/sewcloud.xml'):
+def get_xml_data(filename='/etc/sewcloud.xml'):
     doc = minidom.parse(filename) 
     root = doc.documentElement
 
