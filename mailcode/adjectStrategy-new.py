@@ -45,7 +45,8 @@ def insertnewstg(server_id, server_ip, domainkey, resource_ids, owner_type, owne
         sys.exit()
 
 if __name__ == '__main__':
-    parser = argparse.ArgumentParser(description="调整通道")
+    parser = argparse.ArgumentParser(formatter_class=argparse.RawDescriptionHelpFormatter,
+        description="配置通道\n\nExample:\n    QQ:   python %(prog)s -d qqdomain -c 80008 -l 2\n    163:  python %(prog)s -d netease -c 80008 -r 799\n    sina: python %(prog)s -d sinadomain -c 8008 -r 799")
     parser.add_argument("-d", "--domainkey", action="store", dest='domainkey', default='qqdomain', 
                             help="domainkey: qqdomain, netease, sinadomain, elink.other, default")
     parser.add_argument("-D", "--delete", action="store_true", help="Delete strategy!")

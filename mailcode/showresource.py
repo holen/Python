@@ -47,7 +47,8 @@ def showresource():
         sys.exit()
 
 if __name__ == '__main__':
-    parser = argparse.ArgumentParser(description="show resources info")
+    parser = argparse.ArgumentParser(formatter_class=argparse.RawDescriptionHelpFormatter,
+        description="show resources info\n\nExample:\n    python %(prog)s -r 794,795")
     parser.add_argument("-r", "--rids", action="store", dest="rids", help="resource_ids")
     args = parser.parse_args()
     if args.rids:

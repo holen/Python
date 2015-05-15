@@ -2,7 +2,9 @@
 #!/usr/bin/python
 
 import argparse
-parser = argparse.ArgumentParser(description="calculate X to the power of Y")
+#parser = argparse.ArgumentParser(prog='argparseTest.py',usage='%(prog)s 2', description='calculate X to the power of Y')
+parser = argparse.ArgumentParser(formatter_class=argparse.RawDescriptionHelpFormatter,
+    description='calculate X to the power of Y \n\nExample: \n    python %(prog)s 2')
 parser.add_argument("square", type=int, 
                     help="display a square of a given number")
 parser.add_argument("-t", "--test", action="store_true")

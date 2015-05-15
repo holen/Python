@@ -26,7 +26,8 @@ def digmx(to_mail, source_ip):
         sys.exit()
     return mx
 
-parser = argparse.ArgumentParser(description="Send mail use specified args")
+parser = argparse.ArgumentParser(formatter_class=argparse.RawDescriptionHelpFormatter,
+            description="Send mail use specified args")
 parser.add_argument("-f", "--mail_from", required=True, action="store", dest='mail_from', help="sender")
 parser.add_argument("-t", "--to_mail", required=True, action="store", dest='to_mail', help="receiver")
 parser.add_argument("-i", "--source_ip", required=True, action="store", dest='source_ip', help="specified local send ip")
