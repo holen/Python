@@ -1,5 +1,13 @@
 # Writing your first Django app, part1 (modes)
 
+MTV
+
+    """
+        request --> view.function   -->response
+                --> model
+                --> templates
+    """
+
 ## First Django App
 
 show django version
@@ -50,3 +58,15 @@ Playing with the API
 	c.delete()
 	q.choice_set.count()
 	q.choice_set.all()
+
+Add templates
+
+    mkdir templates
+
+    vim setting
+    TEMPLATE_DIRS = [os.path.join(BASE_DIR, 'templates')]
+
+Return
+
+    Httpresponse()          # 返回数据
+    render_to_response()    # 返回页面
