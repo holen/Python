@@ -52,7 +52,7 @@ def export():
 
 	result = []
 
-	the_dir = "C:\\Users\\huilong.zhang\\Desktop\\%s" % (yestoday);
+	the_dir = "C:\\Users\\zhang\\Desktop\\%s" % (yestoday);
 	
 	if os.path.exists(the_dir) :
 		os.rename(the_dir,'%s.bak' % (the_dir))
@@ -78,11 +78,11 @@ def export():
 		csvfile.close();
 
 def sendMail():
-	sender = 'huilong.zhang@epcare.com.cn'  
-	receiver = ['zhiping.chen@epcare.com.cn', 'wenqian.xie@epcare.com.cn', 'huilong.zhang@epcare.com.cn', 'weizhao.tang@epcare.com.cn', 'yongkun.liao@epcare.com.cn']
-	# receiver = ['huilong.zhang@epcare.com.cn']
+	sender = 'zhang@epcare.com.cn'  
+	receiver = ['zhiping.chen@epcare.com.cn', 'wenqian.xie@epcare.com.cn', 'zhang@epcare.com.cn', 'weizhao.tang@epcare.com.cn', 'yongkun.liao@epcare.com.cn']
+	# receiver = ['zhang@epcare.com.cn']
 	smtpserver = 'mail.epcare.com.cn'  
-	username = 'huilong.zhang@epcare.com.cn'  
+	username = 'zhang@epcare.com.cn'  
 	password = 'epcare2012zh1'  
 	yestoday = date.today() - timedelta(hours=24);
 	msgRoot = MIMEMultipart('related') 
@@ -116,7 +116,7 @@ def sendMail():
 	msgRoot.attach(msgImage)
 
 	#构造附件  
-	the_dir = 'C:\\Users\\huilong.zhang\\Desktop\\%s\\' % yestoday
+	the_dir = 'C:\\Users\\zhang\\Desktop\\%s\\' % yestoday
 	if os.path.exists(the_dir) :
 	    os.chdir('%s' % (the_dir))
 	else:

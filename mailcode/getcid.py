@@ -22,7 +22,6 @@ def getcid(mid):
         '''
     global_conn = mdb.get_global_conn();
     client_id = mdb.exe_sql(global_conn, sql_str % mid, False, True)
-    print client_id[0][1]
     return client_id[0][0]
 
 if __name__ == '__main__':

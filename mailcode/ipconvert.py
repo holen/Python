@@ -44,7 +44,7 @@ def convert(ip):
 # convert('119.163.252.40')
 # bin2dec('1110')
 
-f = open('C:\\Users\\huilong.zhang\\Desktop\\ip.csv', 'rb')
+f = open('C:\\Users\\zhang\\Desktop\\ip.csv', 'rb')
 data = f.readlines()
 f.close()
 for eachLine in data:
