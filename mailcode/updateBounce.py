@@ -29,15 +29,6 @@ if __name__ == '__main__':
             last_rt_id = sys.argv[2]
             limit_num = sys.argv[3]
             cid = gcid.getcid(mid)
-            while True:
-                flag = raw_input("There are affect %s rows on messages:%s and the last_rt_id=%s, are you when to continue [y/n]: " % (limit_num, mid, last_rt_id))
-                if flag == 'y':
-                    updateBounce(cid, mid, last_rt_id, limit_num)
-                    break
-                elif flag == 'n':
-                    print "Nothing is dode !"
-                    break
-                else:
-                    print "Please input y/n " 
+	    updateBounce(cid, mid, last_rt_id, limit_num)
     else:
         print("修改报表\nUsage: python %s mid last_rt_id limit_num "% sys.argv[0]);

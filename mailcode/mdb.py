@@ -27,8 +27,8 @@ vmware_name = "globalDB_0"
 day_report_host = "192.168.1.222"
 day_report_name = "yulin"
 
-def get_vmware_conn():
-    return db_helper.connect(vmware_host, 'root', 'qwer1234', vmware_name, charset='utf8');
+def get_list_conn():
+    return db_helper.connect(list_db_host, mdb_user, mdb_pass, list_db_name, charset='utf8');
 
 def get_error_conn():
     return db_helper.connect(day_report_host, 'report', 'qwer1234', day_report_name, charset='utf8');
