@@ -5,6 +5,10 @@ import sys
 import time
 import logging
 from selenium import webdriver
+# from pyvirtualdisplay import Display
+
+# display = Display(visible=0, size=(1024, 768))
+# display.start()
 
 
 def login(login_name, passwd):
@@ -18,6 +22,8 @@ def login(login_name, passwd):
         time.sleep(1)
     except Exception, e:
         print e
+        browser.quit()
+        # display.stop()
         sys.exit(0)
 
 
@@ -46,7 +52,7 @@ def clickMail(box):
             # click inbox
             inbox = browser.find_element_by_css_selector('span[title=%s]' % box)
             inbox.click()
-            # print "into inbox"
+            print "into %s" % box
             logger.info("into %s" % box)
         except Exception, e:
             # print e
@@ -58,6 +64,8 @@ def clickMail(box):
             time.sleep(1)
             unread = browser.find_element_by_css_selector('b[title=未读]')
             # unread.click()
+            print unread.get_attribute('id')
+            # logger.info(unread.get_attribute('id'))
         except Exception, e:
             print "没有未读邮件"
             logger.info("没有未读邮件")
@@ -67,14 +75,17 @@ def clickMail(box):
         try:
             mail = browser.find_element_by_id(unread.get_attribute('id').replace('LogoB', 'MidDiv'))
             mail.click()
+            print "点击邮件OK"
             num += 1
-            if num > 10:
+            if num > 2:
                 break
         except Exception, e:
             print "点击邮件错误"
             logger.info("点击邮件错误")
             logger.error(e)
             num += 1
+            if num > 2:
+                break
             continue
 
 
@@ -87,8 +98,10 @@ def clickHideFolders():
         logger.info("点击其他文件夹错误")
         logger.error(e)
         browser.quit()
+        # display.stop()
 
+# clickHideFolders()
 clickMail("收件箱")
-clickHideFolders()
 clickMail("订阅邮件")
 browser.quit()
+# display.stop()

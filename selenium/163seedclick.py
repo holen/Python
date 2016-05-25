@@ -1,9 +1,10 @@
 #!/usr/bin/env python3
 #coding: utf-8
-
+import sys
 import subprocess
 
-myseed = "/tmp/my163seed.txt"
+# myseed = "/tmp/my163seed.txt"
+myseed = sys.argv[1]
 
 command = '''python click163.py %s %s'''
 
