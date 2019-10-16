@@ -32,6 +32,7 @@ def generate_token():
 
 
 class LoginSession:
+    """ 用 Redis hash 实现 session 创建、验证和销毁 """
 
     def __init__(self, client, user_id):
         self.client = client

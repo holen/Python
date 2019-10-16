@@ -3,7 +3,7 @@ __author__ = 'zhl'
 __date__ = '2019/10/15 18:04'
 
 
-from short_url import base36
+from redis_test.short_url import base36
 from redis import Redis
 
 ID_COUNTER = "ShortyUrl::id_counter"
@@ -11,6 +11,7 @@ URL_HASH = "ShortyUrl::url_hash"
 
 
 class ShortyUrl:
+    """ 用 Redis Hash 实现短网址生成程序 """
 
     def __init__(self, client):
         self.client = client
